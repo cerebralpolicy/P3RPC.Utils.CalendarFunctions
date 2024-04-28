@@ -1,0 +1,21 @@
+{
+  "ModId": "P3RPC.Utils.CalendarFunctions.Reloaded",
+  "ModName": "P3R Calendar Functions",
+  "ModAuthor": "CerebralPolicy",
+  "ModVersion": "1.0.0",
+  "ModDescription": "An API to implement calendar functionality",
+  "ModDll": "P3RPC.Utils.CalendarFunctions.Reloaded.dll",
+  "ModIcon": "Preview.png",
+  "ModR2RManagedDll32": "x86/P3RPC.Utils.CalendarFunctions.Reloaded.dll",
+  "ModR2RManagedDll64": "x64/P3RPC.Utils.CalendarFunctions.Reloaded.dll",
+  "ModNativeDll32": "",
+  "ModNativeDll64": "",
+  "IsLibrary": false,
+  "ReleaseMetadataFileName": "P3RPC.Utils.CalendarFunctions.Reloaded.ReleaseMetadata.json",
+  "PluginData": {},
+  "IsUniversalMod": false,
+  "ModDependencies": [ "reloaded.sharedlib.hooks" ],
+  "OptionalDependencies": [],
+  "SupportedAppId": [],
+  "ProjectUrl": ""
+}
