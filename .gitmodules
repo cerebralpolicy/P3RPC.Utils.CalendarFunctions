@@ -1,0 +1,12 @@
+[submodule "Submodules/Project.Utils"]
+	path = Submodules/Project.Utils
+	url = https://github.com/T-PoseRatkechi/Project.Utils.git
+[submodule "Submodules/SharedScans"]
+	path = Submodules/SharedScans
+	url = https://github.com/T-PoseRatkechi/SharedScans.git
+[submodule "Submodules/p3rpc.nativetypes"]
+	path = Submodules/p3rpc.nativetypes
+	url = https://github.com/rirurin/p3rpc.nativetypes.git
+[submodule "Submodules/Unreal.ObjectsEmitter"]
+	path = Submodules/Unreal.ObjectsEmitter
+	url = https://github.com/MirrorTuneZM/Unreal.ObjectsEmitter.git

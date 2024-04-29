@@ -1,7 +1,10 @@
-﻿using P3RPC.Utils.CalendarFunctions.Reloaded.Configuration;
+﻿using P3RPC.Utils.CalendarFunctions.Interfaces.Types;
+using P3RPC.Utils.CalendarFunctions.Reloaded.Configuration;
 using P3RPC.Utils.CalendarFunctions.Reloaded.Template;
 using Reloaded.Hooks.ReloadedII.Interfaces;
 using Reloaded.Mod.Interfaces;
+using Unreal.ObjectsEmitter.Interfaces;
+using Unreal.ObjectsEmitter.Interfaces.Types;
 
 namespace P3RPC.Utils.CalendarFunctions.Reloaded
 {
@@ -50,6 +53,14 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             _configuration = context.Configuration;
             _modConfig = context.ModConfig;
 
+            _modLoader.GetController<IUObjects>().TryGetTarget(out var uObjects);
+            if (uObjects == null) throw new Exception($"[{_modConfig.ModName}] Could not get Reloaded hooks");
+
+            Action<UnrealObject> ReadDate = (ThisDate) => {
+                ThisDate.
+            }
+
+            uObjects.FindObject(nameof(UCldDateMessageDataAsset), ReadDate);
 
             // For more information about this template, please see
             // https://reloaded-project.github.io/Reloaded-II/ModTemplate/
