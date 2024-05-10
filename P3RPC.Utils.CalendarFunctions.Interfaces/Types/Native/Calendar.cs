@@ -24,6 +24,11 @@ public unsafe struct Calendar
     /// Next time slot.
     /// </summary>
     [FieldOffset(0xc)] public ECldTimeZone NextTimeskipTime;
+
+    public static explicit operator Calendar(UObject v) 
+    {
+        return (Calendar)v;
+    }
 }
 
 /// <summary>
@@ -47,11 +52,17 @@ public unsafe struct UCalendar
     /// (current day)-1?
     /// </summary>
     [FieldOffset(0x00A0)] public int mChangePrevDay_;
+    /// <summary>
+    /// Previous time slot
+    /// </summary>
     [FieldOffset(0x00A4)] public ECldTimeZone mChangePrevTimeZone_;
     /// <summary>
     /// (current day)+1?
     /// </summary>
     [FieldOffset(0x00A8)] public int mChangeNextDay_;
+    /// <summary>
+    /// Next time slot.
+    /// </summary>
     [FieldOffset(0x00AC)] public ECldTimeZone mChangeNextTimeZone_;
     [FieldOffset(0x00B0)] public int cursorDay;
 }

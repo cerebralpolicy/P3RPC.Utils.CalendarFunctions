@@ -14,8 +14,13 @@
   "ReleaseMetadataFileName": "P3RPC.Utils.CalendarFunctions.Reloaded.ReleaseMetadata.json",
   "PluginData": {},
   "IsUniversalMod": false,
-  "ModDependencies": [ "reloaded.sharedlib.hooks" ],
+  "ModDependencies": [
+    "reloaded.sharedlib.hooks",
+    "Reloaded.Memory.SigScan.ReloadedII",
+    "SharedScans.Reloaded",
+    "Unreal.ObjectsEmitter.Reloaded"
+  ],
   "OptionalDependencies": [],
-  "SupportedAppId": [],
+  "SupportedAppId": ["p3r.exe"],
   "ProjectUrl": ""
 }

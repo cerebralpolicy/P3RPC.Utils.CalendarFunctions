@@ -1066,9 +1066,9 @@ public unsafe struct FSubsurfaceProfileStruct
 
 public unsafe struct FLightmassMaterialInterfaceSettings
 {
-    float EmissiveBoost;                                                              // 0x0000 (size: 0x4)
-    float DiffuseBoost;                                                               // 0x0004 (size: 0x4)
-    float ExportResolutionScale;                                                      // 0x0008 (size: 0x4)
+    //float EmissiveBoost;                                                              // 0x0000 (size: 0x4)
+    //float DiffuseBoost;                                                               // 0x0004 (size: 0x4)
+    //float ExportResolutionScale;                                                      // 0x0008 (size: 0x4)
     //byte bCastShadowAsMasked;                                                        // 0x000C (size: 0x1)
     //byte bOverrideCastShadowAsMasked;                                                // 0x000C (size: 0x1)
     //byte bOverrideEmissiveBoost;                                                     // 0x000C (size: 0x1)
@@ -1079,9 +1079,9 @@ public unsafe struct FLightmassMaterialInterfaceSettings
 
 public unsafe struct FMaterialTextureInfo
 {
-    float SamplingScale;                                                              // 0x0000 (size: 0x4)
-    int UVChannelIndex;                                                                 // 0x0004 (size: 0x4)
-    FName TextureName;                                                                // 0x0008 (size: 0x8)
+//    float SamplingScale;                                                              // 0x0000 (size: 0x4)
+//    int UVChannelIndex;                                                                 // 0x0004 (size: 0x4)
+//    FName TextureName;                                                                // 0x0008 (size: 0x8)
 
 }; // Size: 0x10
 
@@ -1378,7 +1378,7 @@ public enum ERichCurveTangentWeightMode : byte
 
 public unsafe struct FRichCurveKey
 {
-    ERichCurveInterpMode InterpMode;                                     // 0x0000 (size: 0x1)
+/*    ERichCurveInterpMode InterpMode;                                     // 0x0000 (size: 0x1)
     ERichCurveTangentMode TangentMode;                                   // 0x0001 (size: 0x1)
     ERichCurveTangentWeightMode TangentWeightMode;                       // 0x0002 (size: 0x1)
     float Time;                                                                       // 0x0004 (size: 0x4)
@@ -1387,7 +1387,7 @@ public unsafe struct FRichCurveKey
     float ArriveTangentWeight;                                                        // 0x0010 (size: 0x4)
     float LeaveTangent;                                                               // 0x0014 (size: 0x4)
     float LeaveTangentWeight;                                                         // 0x0018 (size: 0x4)
-
+*/
 }; // Size: 0x1C
 
 [StructLayout(LayoutKind.Explicit, Size = 0x80)]

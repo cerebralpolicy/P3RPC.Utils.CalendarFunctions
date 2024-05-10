@@ -16,7 +16,7 @@ public enum EDateMonth: byte
     November = 10,
     December = 11,
     MonthMax = 12,
-    EDateMonth_Max = 13,
+    EDateMonth_MAX = 13,
 }
 public enum EDateMonthOrdered: byte
 {

@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <OutputPath>$(RELOADEDIIMODS)/P3RPC.Utils.CalendarFunctions.Reloaded</OutputPath>
+    <OutputPath>$(RELOADEDIIMODS)/p3rpc.nativetypes.calendarfunctions.reloaded</OutputPath>
     <ImplicitUsings>enable</ImplicitUsings>
 
     <!-- IL Trimming Support for Framework Dependent Apps. Unofficial.
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ReloadedLinkRoots Include="P3RPC.Utils.CalendarFunctions.Reloaded" />
+    <ReloadedLinkRoots Include="p3rpc.nativetypes.calendarfunctions.reloaded" />
     <!-- Add assemblies to be trimmed. You might need to add their dependencies too!  -->
     <!-- <ReloadedLinkAssemblies Include="Reloaded.Memory" /> -->
   </ItemGroup>
@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <None Remove="ModConfig.json" />
+    <None Remove="Publish.ps1" />
     <None Remove="BuildLinked.ps1" />
     <None Remove="Reloaded.Trimming.targets" />
     <None Remove="Reloaded.Checks.targets" />
@@ -47,15 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="NewFolder\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\P3RPC.Utils.CalendarFunctions.Interfaces\P3RPC.Utils.CalendarFunctions.Interfaces.csproj" />
-    <ProjectReference Include="..\Submodules\Project.Utils\Project.Utils.csproj" />
-    <ProjectReference Include="..\Submodules\SharedScans\SharedScans.Interfaces\SharedScans.Interfaces.csproj" />
-    <ProjectReference Include="..\Submodules\SharedScans\SharedScans.Reloaded\SharedScans.Reloaded.csproj" />
-    <ProjectReference Include="..\Submodules\Unreal.ObjectsEmitter\Unreal.ObjectsEmitter.Interfaces\Unreal.ObjectsEmitter.Interfaces.csproj" />
+    <Folder Include="Hooks\" />
   </ItemGroup>
 
 </Project>

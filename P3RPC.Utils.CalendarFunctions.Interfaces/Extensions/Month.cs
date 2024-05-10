@@ -1,44 +1,28 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
+using P3RPC.Utils.CalendarFunctions.Interfaces.Types;
+namespace P3RPC.Utils.CalendarFunctions.Interfaces.Extensions;
 
-namespace P3RPC.Utils.CalendarFunctions.Interfaces.Types;
-
-public struct Year
+public static class MonthEx
 {
-    public Month April;
-    public Month May;
-    public Month June;
-    public Month July;
-    public Month August;
-    public Month September;
-    public Month October;
-    public Month November;
-    public Month December;
-    public Month January;
-    public Month February;
-    public Month March;
-
-    public Year()
-    {
-        April = new(EDateMonth.April,30);
-        May = new(EDateMonth.May,31);
-        June = new(EDateMonth.June,30); 
-        July = new(EDateMonth.July,31);
-        August = new(EDateMonth.August,31);
-        September = new(EDateMonth.September,30);
-        October = new(EDateMonth.October, 31);
-        November = new(EDateMonth.November, 30);
-        December = new(EDateMonth.December, 31);
-        January = new(EDateMonth.January, 31);
-        February = new(EDateMonth.February, 28);
-        March = new(EDateMonth.March, 31);
-    }
-}
-
-public static class MonthExtensions
-{
+    public static EDateMonth GetEDateMonth(EDateMonthStartOrdered month)
+        => month switch
+        {
+            EDateMonthStartOrdered.January => EDateMonth.January,
+            EDateMonthStartOrdered.February => EDateMonth.February,
+            EDateMonthStartOrdered.March => EDateMonth.March,
+            EDateMonthStartOrdered.April => EDateMonth.April,
+            EDateMonthStartOrdered.May => EDateMonth.May,
+            EDateMonthStartOrdered.June => EDateMonth.June,
+            EDateMonthStartOrdered.July => EDateMonth.July,
+            EDateMonthStartOrdered.August => EDateMonth.August,
+            EDateMonthStartOrdered.September => EDateMonth.September,
+            EDateMonthStartOrdered.October => EDateMonth.October,
+            EDateMonthStartOrdered.November => EDateMonth.November,
+            EDateMonthStartOrdered.December => EDateMonth.December,
+            EDateMonthStartOrdered.MonthStartOrderedMax => EDateMonth.MonthMax,
+            EDateMonthStartOrdered.EDateMonthStartOrdered_MAX => EDateMonth.EDateMonth_MAX,
+            _ => throw new InvalidEnumArgumentException(nameof(month), (int)month, typeof(EDateMonthStartOrdered)),
+        };
     public static EDateMonthOrdered GetMonthOrdered(EDateMonth month)
         => month switch
         {
@@ -55,7 +39,7 @@ public static class MonthExtensions
             EDateMonth.November => EDateMonthOrdered.November,
             EDateMonth.December => EDateMonthOrdered.December,
             EDateMonth.MonthMax => EDateMonthOrdered.MonthOrderedMax,
-            EDateMonth.EDateMonth_Max => EDateMonthOrdered.EDateMonthOrdered_MAX,
+            EDateMonth.EDateMonth_MAX => EDateMonthOrdered.EDateMonthOrdered_MAX,
             _ => throw new InvalidEnumArgumentException(nameof(month),(int)month,typeof(EDateMonth)),
         };
     public static EDateMonthStartOrdered GetMonthStart(EDateMonthOrdered month)
@@ -77,22 +61,4 @@ public static class MonthExtensions
             EDateMonthOrdered.EDateMonthOrdered_MAX => EDateMonthStartOrdered.EDateMonthStartOrdered_MAX,
             _ => throw new InvalidEnumArgumentException(nameof(month), (int)month, typeof(EDateMonthOrdered)),
         };
-}
-public class Month
-{
-    public string name;
-    public EDateMonth dateMonth;
-    public EDateMonthOrdered dateMonthOrdered;
-    public uint dateDaysInMonth;
-    public uint dateDayStart;
-
-    public Month(EDateMonth eDateMonth, uint eDateDaysInMonth)
-    {
-        name = nameof(eDateMonth);
-        dateMonth = eDateMonth;
-        var convertMonth = MonthExtensions.GetMonthOrdered(dateMonth);
-        dateMonthOrdered = convertMonth;
-        dateDaysInMonth = eDateDaysInMonth;
-        dateDayStart = ((uint)MonthExtensions.GetMonthStart(convertMonth));
-    }
 }

@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace P3RPC.Utils.CalendarFunctions.Interfaces.Types.Native;
 
+[StructLayout(LayoutKind.Explicit, Size = 0x68)]
+public unsafe struct UAssetLoader //: public UObject
+{
+};
+
+
 [StructLayout(LayoutKind.Explicit, Size = 0x250E0)]
 public unsafe struct UGlobalWork //: public UGameInstance
 {
@@ -68,6 +74,7 @@ public unsafe struct UGlobalWork //: public UGameInstance
 
     //public FDatUnitWork* GetUnit(int i) { fixed (UGlobalWork* self = &this) { return &((FDatUnitWork*)((nint)self + 0x1b0))[i]; } }
 
+
     public List<short> GetActiveCharacters()
     {
         List<short> ids = new();
@@ -81,6 +88,21 @@ public unsafe struct UGlobalWork //: public UGameInstance
             }
         }
         return ids;
+    }
+
+    public static explicit operator UGlobalWork(UObject v)
+    {
+        return (UGlobalWork)v;
+    }
+
+    public static explicit operator UGlobalWork(Unreal.ObjectsEmitter.Interfaces.Types.UnrealObject v)
+    {
+        return (UGlobalWork)v;
+    }
+
+    public static explicit operator UGlobalWork(UGlobalWork* v)
+    {
+        return (UGlobalWork)v;
     }
 
     public bool GetBitflag(uint id)
@@ -101,5 +123,24 @@ public unsafe struct UGlobalWork //: public UGameInstance
                 default: return false;
             }
         }
+    }
+}
+[StructLayout(LayoutKind.Explicit, Size = 0xE8)]
+public unsafe struct UUIResources // : UGameInstanceSubsystem
+{
+    //[FieldOffset(0x0000)] public UGameInstanceSubsystem baseObj;
+    [FieldOffset(0x30)] public byte bIsReady;
+    [FieldOffset(0x0038)] public UAssetLoader* Loader_;
+    [FieldOffset(0x0040)] public TArray<nint> Assets_;
+    [FieldOffset(0x00D0)] public UDataTable* HandwritingLayoutData_;
+    //[FieldOffset(0x00D8)] public UFontStyleAsset* FontStyleAsset_;
+    //[FieldOffset(0x00E0)] public UFont* SystemFont_;
+
+    public UObject* GetAssetEntry(byte index)
+    {
+        UObject* asset = null;
+        if ((bIsReady & 1) != 0 && index < Assets_.arr_num)
+            asset = (UObject*)Assets_.allocator_instance[index];
+        return asset;
     }
 }

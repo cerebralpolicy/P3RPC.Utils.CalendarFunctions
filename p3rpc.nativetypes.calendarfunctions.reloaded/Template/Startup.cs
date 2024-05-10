@@ -3,14 +3,13 @@
  * to make it easier to upgrade to newer versions of the template.
 */
 
-using P3RPC.Utils.CalendarFunctions.Interfaces;
-using P3RPC.Utils.CalendarFunctions.Reloaded.Configuration;
-using P3RPC.Utils.CalendarFunctions.Reloaded.Template.Configuration;
+using p3rpc.nativetypes.calendarfunctions.reloaded.Configuration;
+using p3rpc.nativetypes.calendarfunctions.reloaded.Template.Configuration;
 using Reloaded.Hooks.ReloadedII.Interfaces;
 using Reloaded.Mod.Interfaces;
 using Reloaded.Mod.Interfaces.Internal;
 
-namespace P3RPC.Utils.CalendarFunctions.Reloaded.Template
+namespace p3rpc.nativetypes.calendarfunctions.reloaded.Template
 {
     public class Startup : IMod
     {

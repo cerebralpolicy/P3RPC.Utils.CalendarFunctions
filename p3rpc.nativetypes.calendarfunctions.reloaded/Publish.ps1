@@ -162,8 +162,8 @@ param (
     $UseScriptDirectory=$True,
 
     ## => User Config <= ## 
-    $ProjectPath = "P3RPC.Utils.CalendarFunctions.Reloaded.csproj",
-    $PackageName = "P3RPC.Utils.CalendarFunctions.Reloaded",
+    $ProjectPath = "p3rpc.nativetypes.calendarfunctions.reloaded.csproj",
+    $PackageName = "p3rpc.nativetypes.calendarfunctions.reloaded",
     $PublishOutputDir = "Publish/ToUpload",
 
     ## => User: Delta Config
@@ -180,14 +180,14 @@ param (
 
     $GameBananaItemId = 333681, # From mod page URL.
 
-    $NuGetPackageId = "P3RPC.Utils.CalendarFunctions.Reloaded",
+    $NuGetPackageId = "p3rpc.nativetypes.calendarfunctions.reloaded",
     $NuGetFeedUrl = "http://packages.sewer56.moe:5000/v3/index.json",
     $NuGetAllowUnlisted = $False,
 
     ## => User: Publish Config
-    $PublishGeneric    = $False,
-    $PublishNuGet      = $False,
-    $PublishGameBanana = $False
+    $PublishGeneric    = $True,
+    $PublishNuGet      = $True,
+    $PublishGameBanana = $True
 )
 
 ## => User: Publish Output

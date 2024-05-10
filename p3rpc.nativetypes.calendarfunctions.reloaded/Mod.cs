@@ -1,15 +1,9 @@
-﻿
-using P3RPC.Utils.CalendarFunctions.Reloaded.Components;
-using P3RPC.Utils.CalendarFunctions.Reloaded.Configuration;
-using P3RPC.Utils.CalendarFunctions.Reloaded.Template;
+﻿using p3rpc.nativetypes.calendarfunctions.reloaded.Configuration;
+using p3rpc.nativetypes.calendarfunctions.reloaded.Template;
 using Reloaded.Hooks.ReloadedII.Interfaces;
-using Reloaded.Memory.SigScan.ReloadedII.Interfaces;
 using Reloaded.Mod.Interfaces;
-using SharedScans.Interfaces;
-using System.Diagnostics;
-using Unreal.ObjectsEmitter.Interfaces;
 
-namespace P3RPC.Utils.CalendarFunctions.Reloaded
+namespace p3rpc.nativetypes.calendarfunctions.reloaded
 {
     /// <summary>
     /// Your mod logic goes here.
@@ -42,23 +36,10 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
         /// </summary>
         private Config _configuration;
 
-
         /// <summary>
         /// The configuration of the currently executing mod.
         /// </summary>
         private readonly IModConfig _modConfig;
-        public const string NAME = "ThisMod";
-
-
-        private readonly IUnreal _unreal;
-
-        private readonly IUObjects _uObjects;
-
-        private readonly ISharedScans? _sharedScans;
-
-        private GameDate? _gameDate;
-
-        private long baseAddress;
 
         public Mod(ModContext context)
         {
@@ -68,31 +49,6 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             _owner = context.Owner;
             _configuration = context.Configuration;
             _modConfig = context.ModConfig;
-            
-
-            _modLoader.GetController<IUObjects>().TryGetTarget(out var uObjects);
-            if (uObjects == null) throw new Exception($"[{_modConfig.ModName}] Could not get Reloaded hooks");
-            _uObjects = uObjects;
-            _modLoader.GetController<IUnreal>().TryGetTarget(out var unreal);
-            if (unreal == null) throw new Exception($"[{_modConfig.ModName}] Could not get Reloaded hooks");
-            _unreal = unreal;
-
-            var mainModule = Process.GetCurrentProcess().MainModule;
-            if (mainModule == null) throw new Exception($"[{_modConfig.ModName}] Could not get main module");
-            baseAddress = mainModule.BaseAddress;
-            _modLoader.GetController<IStartupScanner>().TryGetTarget(out var startupScanner);
-            _modLoader.GetController<ISharedScans>().TryGetTarget(out var sharedScans);
-            if (_hooks == null) throw new Exception($"[{_modConfig.ModName}] Could not get Reloaded hooks");
-            if (sharedScans == null) throw new Exception($"[{_modConfig.ModName}] Could not get controller for Shared Scans");
-            _sharedScans = sharedScans;
-            if (startupScanner == null) throw new Exception($"[{_modConfig.ModName}] Could not get controller for Startup Scanner");
-
-            //_methods = new(sharedScans);
-            if (_sharedScans != null)
-            {
-                _gameDate = new(_sharedScans);
-                _gameDate.iface_GameDate.PropertyChanged += Iface_GameDate_PropertyChanged;
-            }
 
 
             // For more information about this template, please see
@@ -102,11 +58,6 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             // and some other neat features, override the methods in ModBase.
 
             // TODO: Implement some mod logic
-        }
-
-        private void Iface_GameDate_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            Log.Debug($"[{_modConfig.ModName}] Date changed.", true);
         }
 
         #region Standard Overrides

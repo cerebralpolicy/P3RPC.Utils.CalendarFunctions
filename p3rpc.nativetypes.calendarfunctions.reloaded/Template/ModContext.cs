@@ -1,9 +1,8 @@
-﻿using P3RPC.Utils.CalendarFunctions.Interfaces;
-using P3RPC.Utils.CalendarFunctions.Reloaded.Configuration;
+﻿using p3rpc.nativetypes.calendarfunctions.reloaded.Configuration;
 using Reloaded.Mod.Interfaces;
 using IReloadedHooks = Reloaded.Hooks.ReloadedII.Interfaces.IReloadedHooks;
 
-namespace P3RPC.Utils.CalendarFunctions.Reloaded.Template
+namespace p3rpc.nativetypes.calendarfunctions.reloaded.Template
 {
     /// <summary>
     /// Represents information passed in from the mod loader template to the implementing mod.
@@ -39,6 +38,5 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded.Template
         /// Instance of the IMod interface that created this mod instance.
         /// </summary>
         public IMod Owner { get; set; } = null!;
-
     }
 }
