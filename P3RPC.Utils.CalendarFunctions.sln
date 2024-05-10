@@ -54,10 +54,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unreal.ObjectsEmitter.Inter
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Attempt1", "Attempt1", "{3FD86ACA-0BF9-42F3-85E6-AA2EACCB3D29}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Attempt2", "Attempt2", "{ABA7B2D1-00FB-47DD-B6CF-66408C4D382C}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "p3rpc.nativetypes.calendarfunctions.reloaded", "p3rpc.nativetypes.calendarfunctions.reloaded\p3rpc.nativetypes.calendarfunctions.reloaded.csproj", "{20E30518-85C2-4062-AF93-FE48A38FBB9F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,10 +100,6 @@ Global
 		{A51C46A0-DD50-470A-A259-D9509FD32511}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A51C46A0-DD50-470A-A259-D9509FD32511}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A51C46A0-DD50-470A-A259-D9509FD32511}.Release|Any CPU.Build.0 = Release|Any CPU
-		{20E30518-85C2-4062-AF93-FE48A38FBB9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20E30518-85C2-4062-AF93-FE48A38FBB9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20E30518-85C2-4062-AF93-FE48A38FBB9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20E30518-85C2-4062-AF93-FE48A38FBB9F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -135,8 +127,6 @@ Global
 		{D0494DF8-4C7E-48E1-A5AF-34D1ACD668C3} = {5ACF9F34-C4F9-4ED5-88D0-8CA1695195EC}
 		{23EDDF26-1A5F-4E59-A6AD-C8FA59D85CA3} = {D0494DF8-4C7E-48E1-A5AF-34D1ACD668C3}
 		{A51C46A0-DD50-470A-A259-D9509FD32511} = {DDDDEB69-FD3C-4B2E-8A19-498C624DA7D8}
-		{ABA7B2D1-00FB-47DD-B6CF-66408C4D382C} = {7176A9AE-EEB9-486E-AD3B-45402CE157F9}
-		{20E30518-85C2-4062-AF93-FE48A38FBB9F} = {ABA7B2D1-00FB-47DD-B6CF-66408C4D382C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1CDEC135-B140-4DF3-994A-47557BBB0797}

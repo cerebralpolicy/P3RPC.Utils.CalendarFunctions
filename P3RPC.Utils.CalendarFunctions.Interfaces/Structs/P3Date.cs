@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace P3RPC.Utils.CalendarFunctions.Interfaces.Structs;
 
@@ -14,9 +15,9 @@ public struct P3Date
 {
     public uint DaysElapsed;
     public DateOnly Date;
-    public P3Date(UGlobalWork globalWork)
+    public unsafe P3Date(UGlobalWork* globalWork)
     {
-        var cal = globalWork.Calendar;
+        var cal = globalWork->Calendar;
         var DaysSinceApril = cal.DaysSinceApril1;
         DaysElapsed = DaysSinceApril;
         Date = new DateOnly((int)Year(DaysSinceApril), (int)Month(DaysSinceApril), (int)Day(DaysSinceApril));
@@ -31,6 +32,18 @@ public struct P3Date
     {
         DaysElapsed = DaysSinceApril;
         Date = new DateOnly((int)Year(DaysSinceApril), (int)Month(DaysSinceApril), (int)Day(DaysSinceApril));
+    }
+    public P3Date(int Year, int Month, int Day)
+    {
+        Date = new DateOnly(Year, Month, Day);
+        var month = Date.Month - 1;
+        var _month = (EDateMonth)month;
+        var _monthOrdered = MonthEx.GetMonthOrdered(_month);
+        var _monthStart = MonthEx.GetMonthStart(_monthOrdered);
+        var add = (int)_monthStart;
+        var days = Date.Day - 1;
+        var elapsed = add + days;
+        DaysElapsed = (uint)elapsed;
     }
     public P3Date(DateOnly date)
     {

@@ -1,4 +1,5 @@
-﻿using P3RPC.Utils.CalendarFunctions.Reloaded.Template.Configuration;
+﻿using P3RPC.Utils.CalendarFunctions.Interfaces.Types;
+using P3RPC.Utils.CalendarFunctions.Reloaded.Template.Configuration;
 using Reloaded.Mod.Interfaces.Structs;
 using System.ComponentModel;
 
@@ -9,6 +10,12 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded.Configuration
         [DisplayName("Log Level")]
         [DefaultValue(LogLevel.Information)]
         public LogLevel LogLevel { get; set; } = LogLevel.Information;
+        [DisplayName("Date Format")]
+        [DefaultValue(DateFormatType.International)]
+        public DateFormatType DateFormat { get; set; } = DateFormatType.International;
+        [DisplayName("Run Examples")]
+        [DefaultValue(true)]
+        public bool UseExamples { get; set; }
     }
 
     /// <summary>
