@@ -1,9 +1,7 @@
-﻿
-using P3RPC.Utils.CalendarFunctions.Interfaces;
+﻿using P3RPC.Utils.CalendarFunctions.Interfaces;
 using P3RPC.Utils.CalendarFunctions.Interfaces.Structs;
 using P3RPC.Utils.CalendarFunctions.Reloaded.Components;
 using P3RPC.Utils.CalendarFunctions.Reloaded.Configuration;
-using P3RPC.Utils.CalendarFunctions.Reloaded.Examples;
 using P3RPC.Utils.CalendarFunctions.Reloaded.Template;
 using Reloaded.Hooks.ReloadedII.Interfaces;
 using Reloaded.Memory.Sigscan.Definitions;
@@ -11,8 +9,7 @@ using Reloaded.Memory.SigScan.ReloadedII.Interfaces;
 using Reloaded.Mod.Interfaces;
 using SharedScans.Interfaces;
 using System.Diagnostics;
-using Unreal.ObjectsEmitter.Interfaces;
-using static P3RPC.Utils.CalendarFunctions.Reloaded.Examples.Foobaw;
+using System.Drawing;
 
 namespace P3RPC.Utils.CalendarFunctions.Reloaded
 {
@@ -57,25 +54,12 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
         /// </summary>
         private readonly IModConfig _modConfig;
 
-
-        private readonly IUnreal _unreal;
-
-        private readonly IUObjects _uObjects;
-
-        private readonly ISharedScans? _sharedScans;
-
-        private readonly IStartupScanner? _startupScanner;
-
+        /// <summary>
+        /// Game Date Service
+        /// </summary>
         private readonly GameDate? _gameDate;
 
         private long baseAddress;
-
-        static P3Date NFLSeasonStart = new P3Date(2009, 09, 10);
-        static P3Date NFLSeasonEnd = new P3Date(2010, 01, 07);
-        static P3Date NFLPlayoffStart = new P3Date(2010, 01, 09);
-        static P3Date NFLPlayoffEnd = new P3Date(2010, 02, 07);
-        static P3Date NewYearsDay = new(2010, 01, 01);
-        static P3Date NewYearsEve = new(2009, 12, 31);
 
         public unsafe Mod(ModContext context)
         {
@@ -86,13 +70,9 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             _configuration = context.Configuration;
             _modConfig = context.ModConfig;
 
-            _modLoader.GetController<IUObjects>().TryGetTarget(out var uObjects);
-            if (uObjects == null) throw new Exception($"[{_modConfig.ModName}] Could not get Reloaded hooks");
-            _uObjects = uObjects;
-            _modLoader.GetController<IUnreal>().TryGetTarget(out var unreal);
-            if (unreal == null) throw new Exception($"[{_modConfig.ModName}] Could not get Reloaded hooks");
-            _unreal = unreal;
-
+            Log.Initialize(NAME, _logger, Color.PowderBlue);
+            Log.LogLevel = _configuration.LogLevel;
+            
             var mainModule = Process.GetCurrentProcess().MainModule;
             if (mainModule == null) throw new Exception($"[{_modConfig.ModName}] Could not get main module");
             baseAddress = mainModule.BaseAddress;
@@ -100,25 +80,16 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             _modLoader.GetController<ISharedScans>().TryGetTarget(out var sharedScans);
             if (_hooks == null) throw new Exception($"[{_modConfig.ModName}] Could not get Reloaded hooks");
             if (sharedScans == null) throw new Exception($"[{_modConfig.ModName}] Could not get controller for Shared Scans");
-            _sharedScans = sharedScans;
             if (startupScanner == null) throw new Exception($"[{_modConfig.ModName}] Could not get controller for Startup Scanner");
-            _startupScanner = startupScanner;
 
-            //_methods = new(sharedScans);
-            
-            if (_sharedScans != null)
+             _gameDate = new(sharedScans, startupScanner);
+
+            if (_configuration.UseExamples == true)
             {
-                _gameDate = new(_sharedScans,_startupScanner,_configuration);
-                if (_configuration.UseExamples && _gameDate != null)
-                {
-                    NFLSeasonProgression(_gameDate);
-                    Yearis2009(_gameDate);
-                    Yearis2010(_gameDate);
-                }
+                DateTests();
             }
 
-
-
+            this.ApplyConfig();
             // For more information about this template, please see
             // https://reloaded-project.github.io/Reloaded-II/ModTemplate/
 
@@ -126,41 +97,34 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             // and some other neat features, override the methods in ModBase.
 
             // TODO: Implement some mod logic
-            static void NFLSeasonProgression(GameDate gameDate)
-            {
-                if (gameDate.IsDateInRange(NFLSeasonStart, NFLSeasonEnd))
-                {
-                    var SeasonWeek = gameDate.WeeksOffset(NFLSeasonStart) + 1;
-                    if (gameDate.P3WeekDay(true) == "Tuesday")
-                    {
-                        Log.Information($"The NFL has started Week {SeasonWeek}.");
-                    }
-                    else
-                    {
-                        Log.Information($"The NFL is currently on Week {SeasonWeek}.");
-                    }
-                }
-                else if (gameDate.IsDateInRange(NFLPlayoffStart, NFLPlayoffEnd))
-                {
-                    Log.Information("The NFL Playoffs are being held.");
-                }
-            }
-            static void Yearis2009(GameDate gameDate)
-            {
-                var DateCheck = gameDate.IsDateAtMost(NewYearsEve);
-                if (DateCheck)
-                {
-                    Log.Information("It's still 2009.");
-                }
-            }
-            static void Yearis2010(GameDate gameDate)
-            {
-                var DateCheck = gameDate.IsDateAtLeast(NewYearsDay);
-                if (DateCheck)
-                {
-                    Log.Information("It's now 2010!");
-                }
-            }
+            
+        }
+
+        private void DateTests()
+        {
+            var exampleDate = new P3Date(2009, 10, 01);
+            var exampleElapsed = exampleDate.DaysElapsed;
+            var exampleDateOnly = exampleDate.Date;
+            Log.Debug($"Example date: {exampleDateOnly}");
+            Log.Debug($"Example elapsed: {exampleElapsed}");
+        }
+
+        private unsafe void BoolTests(GameDate gd)
+        {
+            gd.GetUGlobalWork.Invoke();
+            gd.UpdateDayCount();
+            var exampleDate = new P3Date(2009, 10, 01);
+            var exampleElapsed = exampleDate.DaysElapsed;
+            var boolCheck = gd.IsDateAtLeast(exampleDate);
+            Log.Debug($"{exampleDate} has passed: {boolCheck}");
+            var boolCheck2 = gd.IsDayAtLeast(exampleElapsed);
+            Log.Debug($"Day {exampleElapsed} has passed: {boolCheck2}");
+        }
+
+        private void ApplyConfig()
+        {
+            Log.LogLevel = this._configuration.LogLevel;
+            DateTests();
         }
 
         #region Standard Overrides
@@ -170,6 +134,7 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             // ... your code here.
             _configuration = configuration;
             _logger.WriteLine($"[{_modConfig.ModId}] Config Updated: Applying");
+            this.ApplyConfig();
         }
         #endregion
 

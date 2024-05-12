@@ -8,28 +8,88 @@ using Reloaded.Memory.SigScan.ReloadedII.Interfaces;
 using SharedScans.Interfaces;
 using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace P3RPC.Utils.CalendarFunctions.Reloaded.Components
 {
-    internal class GameDate
+    internal unsafe class GameDate: INotifyPropertyChanged
     {
         private string GetUGlobalWork_SIG = "48 89 5C 24 ?? 57 48 83 EC 20 48 8B 0D ?? ?? ?? ?? 33 DB";
 
-        DateFormatType DateFormat = new DateFormatType();
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        public IGameDate? iface_GameDate;
+        private void DayCountChanged([CallerMemberName] string propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                Log.Debug($"Internal day count: {DayCount}");
+            }
+        }
 
+
+        /// <summary>
+        /// The Wrapper Container
+        /// </summary>
+        public WrapperContainer<IGameDate.loadUGlobalWork> ContainUGlobalWork { get; set; }
         public IGameDate.loadUGlobalWork GetUGlobalWork { get; set; }
-        public Locale dateLocale { get; private set; }
+        private uint CachedDayCount = 0;
+        public uint DayCount {  
+            get
+            {
+                return CachedDayCount;
+            } 
+            set
+            {
+                if (CachedDayCount != value)
+                {
+                    CachedDayCount = value;
+                    DayCountChanged();
+                }
+            }
+        }
 
-        public unsafe GameDate(ISharedScans scans, IStartupScanner startup, Config config) 
+        public unsafe GameDate(ISharedScans scans, IStartupScanner startup) 
         {
             startup.AddMainModuleScan(GetUGlobalWork_SIG, MainModuleScanned);
             scans.AddScan<IGameDate.loadUGlobalWork>(GetUGlobalWork_SIG);
             var wrapperContainer = scans.CreateWrapper<IGameDate.loadUGlobalWork>(Mod.NAME);
-            DateFormat = config.DateFormat;
-            dateLocale =  new(DateFormat);
             GetUGlobalWork = wrapperContainer.Wrapper;
+            ContainUGlobalWork = wrapperContainer;
+            Log.Information("Loaded GameDate");
+            Log.Debug($"Internal day count: {DayCount}");
+        }
+
+        public unsafe void UpdateDayCount() {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            if (globalWork != null)
+            {
+                DayCount = globalWork->Calendar.DaysSinceApril1;
+            };
+        }
+        public unsafe void PrintDate()
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            if (globalWork != null)
+            {
+                var date = new P3Date(globalWork->Calendar).Date;
+                Log.Information(date.ToShortDateString(),true);
+            }
+        }
+
+        public unsafe bool IsDayAtLeast(uint DaysElapsed)
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            var GlobalElapsed = globalWork->Calendar.DaysSinceApril1;
+            return DaysElapsed >= GlobalElapsed;
+        }
+
+        public unsafe bool IsDateAtLeast(P3Date date)
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            var GlobalElapsed = globalWork->Calendar.DaysSinceApril1;
+            var DaysElapsed = date.DaysElapsed;
+            return DaysElapsed >= GlobalElapsed;
         }
 
         private void MainModuleScanned(PatternScanResult result)
@@ -37,264 +97,6 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded.Components
             Log.Debug($"[{Mod.NAME}] Module Signature is {result}.");
         }
 
-        public unsafe string P3WeekDay(bool invariant)
-        {
-            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            var currently = new P3Date(globalWork);
-            if (invariant) 
-            {
-                return currently.Date.ToString("dddd", CultureInfo.CreateSpecificCulture("en-us"));
-            }
-            else
-            { 
-                return currently.Date.ToString("dddd", CultureInfo.CreateSpecificCulture(dateLocale.CalendarLocale)); 
-            }
-        }
-
-
-        public unsafe uint DaysOffset(P3Date date)
-        {
-            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            var currently = new P3Date(globalWork);
-            if (currently.DaysElapsed > date.DaysElapsed)
-            {
-                return currently.DaysElapsed - date.DaysElapsed;
-            }
-            else
-            {
-                return date.DaysElapsed - currently.DaysElapsed;
-            }
-        }
-        public unsafe uint WeeksOffset(P3Date date)
-        {
-            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            var currently = new P3Date(globalWork);
-            if (currently.DaysElapsed > date.DaysElapsed)
-            {
-                var days = (int)currently.DaysElapsed - (int)date.DaysElapsed;
-                double weekD = days / 7;
-                var weeks = Math.Floor(weekD);
-                return (uint)weeks;
-            }
-            else
-            {
-                var days = date.DaysElapsed - currently.DaysElapsed;
-                double weekD = days / 7;
-                var weeks = Math.Floor(weekD);
-                return (uint)weeks;
-            }
-        }
-        public unsafe bool IsDateExactly(P3Date date)
-        {
-            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            P3DateBool dateBool = new(date, globalWork, DateOperation.Exactly);
-            bool MessageSent = false;
-            var currently = new P3Date(globalWork);
-            P3DateStrings formatted = new(date, currently, dateLocale);
-            var condMSG = "DateAtLeast: TRUE";
-            var debugMSG = $"The game is currently on {formatted.currently}";
-            if (date.DaysElapsed != currently.DaysElapsed)
-            {
-                debugMSG = string.Concat(debugMSG, ", which falls");
-            }
-            if (currently.DaysElapsed < date.DaysElapsed)
-            {
-                var offset = date.DaysElapsed - currently.DaysElapsed;
-                var s = "";
-                if (offset > 1)
-                {
-                    s = "s";
-                }
-                condMSG = "DateAtLeast: FALSE";
-                debugMSG = string.Join(" ", $"{offset} day{s} before {formatted.start}.");
-                //Log.Verbose(debugMSG);
-            }
-            else if (currently.DaysElapsed > date.DaysElapsed)
-            {
-                var offset = currently.DaysElapsed - date.DaysElapsed;
-                var s = "";
-                if (offset > 1)
-                {
-                    s = "s";
-                }
-                condMSG = "DateAtLeast: FALSE";
-                debugMSG = string.Join(" ", $"{offset} day{s} after {formatted.start}.");
-                //Log.Verbose(debugMSG);
-            }
-            else
-            {
-                debugMSG = string.Concat(debugMSG, $".");
-            }
-            if (!MessageSent)
-            {
-                Log.Debug(condMSG);
-                Log.Verbose(debugMSG);
-                MessageSent = true;
-            }
-            return dateBool.IsTrue;
-        }
-        public unsafe bool IsDateAtLeast(P3Date date)
-        {
-            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            P3DateBool dateBool = new(date, globalWork);
-            bool MessageSent = false;
-            var currently = new P3Date(globalWork);
-            P3DateStrings formatted = new(date, currently, dateLocale);
-            var condMSG = "DateAtLeast: TRUE";
-            var debugMSG = $"The game is currently on {formatted.currently}";
-            if (date.DaysElapsed != currently.DaysElapsed)
-            {
-                debugMSG = string.Concat(debugMSG, ", which falls");
-            }
-            if (currently.DaysElapsed < date.DaysElapsed)
-            {
-                var offset = date.DaysElapsed - currently.DaysElapsed;
-                var s = "";
-                if (offset > 1)
-                {
-                    s = "s";
-                }
-                condMSG = "DateAtLeast: FALSE";
-                debugMSG = string.Join(" ", $"{offset} day{s} before {formatted.start}.");
-                //Log.Verbose(debugMSG);
-            }
-            else if (currently.DaysElapsed > date.DaysElapsed)
-            {
-                var offset = currently.DaysElapsed - date.DaysElapsed;
-                var s = "";
-                if (offset > 1)
-                {
-                    s = "s";
-                }
-                debugMSG = string.Join(" ", $"{offset} day{s} after {formatted.start}.");
-                //Log.Verbose(debugMSG);
-            }
-            else
-            {
-                debugMSG = string.Concat(debugMSG, $".");
-            }
-            if (!MessageSent)
-            {           
-                Log.Debug(condMSG);
-                Log.Verbose(debugMSG);
-                MessageSent = true;
-            }
-            return dateBool.IsTrue;
-        }
-
-        public unsafe bool IsDateAtMost(P3Date date)
-        {
-            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            P3DateBool dateBool = new(date, globalWork, DateOperation.AtMost);
-            bool MessageSent = false;
-            var currently = new P3Date(globalWork);
-            P3DateStrings formatted = new(date, currently, dateLocale);
-            var condMSG = "DateAtMost: TRUE";
-            var debugMSG = $"The game is currently on {formatted.currently}";
-            if (date.DaysElapsed != currently.DaysElapsed)
-            {
-                debugMSG = string.Concat(debugMSG, ", which falls");
-            }
-            if (currently.DaysElapsed > date.DaysElapsed)
-            {
-                var offset = date.DaysElapsed - currently.DaysElapsed;
-                var s = "";
-                if (offset > 1)
-                {
-                    s = "s";
-                }
-                condMSG = "DateAtMost: FALSE";
-                debugMSG = string.Join(" ", $"{offset} day{s} after {formatted.start}.");
-                //Log.Verbose(debugMSG);
-            }
-            else if (currently.DaysElapsed > date.DaysElapsed)
-            {
-                var offset = currently.DaysElapsed - date.DaysElapsed;
-                var s = "";
-                if (offset > 1)
-                {
-                    s = "s";
-                }
-                debugMSG = string.Join(" ", $"{offset} day{s} before {formatted.start}.");
-                //Log.Verbose(debugMSG);
-            }
-            else
-            {
-                debugMSG = string.Concat(debugMSG, $".");
-            }
-            if (!MessageSent)
-            {
-                Log.Debug(condMSG);
-                Log.Verbose(debugMSG);
-                MessageSent = true;
-            }
-            return dateBool.IsTrue;
-        }
-
-        public unsafe bool IsDateInRange(P3Date start, P3Date end)
-        {
-            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            P3DateBool dateBool = new(start,end,globalWork);
-            bool MessageSent = false;
-            var currently = new P3Date(globalWork);
-            P3DateStrings formatted = new(start, end, currently, dateLocale);
-            var debugMSG = $"The game is currently on {formatted.currently}, which falls";
-            if (dateBool.IsTrue && !MessageSent)
-            {
-                debugMSG = string.Join(" ", $"within the defined range of {formatted.start} to {formatted.end}.");
-                Log.Debug("DateInRange: TRUE");
-                Log.Verbose(debugMSG);
-            }
-            else if (!dateBool.IsTrue && !MessageSent)
-            {
-                Log.Debug("DateInRange: FALSE");
-                if (currently.DaysElapsed < start.DaysElapsed)
-                {
-                    var offset = start.DaysElapsed - currently.DaysElapsed;
-                    var s = "";
-                    if (offset > 1)
-                    {
-                        s = "s";
-                    }
-                    debugMSG = string.Join(" ", $"{offset} day{s} before {formatted.start}.");
-                    Log.Verbose(debugMSG);
-                }
-                else
-                {
-                    var offset = currently.DaysElapsed - start.DaysElapsed;
-                    var s = "";
-                    if (offset > 1)
-                    {
-                        s = "s";
-                    }
-                    debugMSG = string.Join(" ", $"{offset} day{s} before {formatted.end}.");
-                    Log.Verbose(debugMSG);
-                }
-            }
-            return dateBool.IsTrue;
-        }
-
-        
-
-        private struct P3DateStrings
-        {
-            public string start;
-            public string? end;
-            public string currently;
-
-            public P3DateStrings(P3Date dateStart, P3Date dateNow, Locale locale)
-            {
-                start = locale.PrintDate(dateStart);
-                currently = locale.PrintDate(dateNow);
-            }
-
-            public P3DateStrings(P3Date dateStart, P3Date dateEnd, P3Date dateNow, Locale locale)
-            {
-                start=locale.PrintDate(dateStart);
-                end=locale.PrintDate(dateEnd);
-                currently=locale.PrintDate(dateNow);
-            }
-        }
 
         private struct P3DateBool
         {
