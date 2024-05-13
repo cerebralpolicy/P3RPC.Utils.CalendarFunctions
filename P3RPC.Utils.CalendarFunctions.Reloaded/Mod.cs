@@ -21,7 +21,7 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
     {
 
         public const string NAME = "Calendar Functions";
-
+        public bool P3IsRunning;
         /// <summary>
         /// Provides access to the mod loader API.
         /// </summary>
@@ -57,7 +57,7 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
         /// <summary>
         /// Game Date Service
         /// </summary>
-        private readonly GameDate? _gameDate;
+        private readonly GameDate _gameDate;
 
         private long baseAddress;
 
@@ -69,6 +69,8 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             _owner = context.Owner;
             _configuration = context.Configuration;
             _modConfig = context.ModConfig;
+
+            P3IsRunning = false;
 
             Log.Initialize(NAME, _logger, Color.PowderBlue);
             Log.LogLevel = _configuration.LogLevel;
@@ -84,12 +86,10 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
 
              _gameDate = new(sharedScans, startupScanner);
 
-            if (_configuration.UseExamples == true)
-            {
-                DateTests();
-            }
 
             this.ApplyConfig();
+
+            P3IsRunning = true;
             // For more information about this template, please see
             // https://reloaded-project.github.io/Reloaded-II/ModTemplate/
 
@@ -109,10 +109,9 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
             Log.Debug($"Example elapsed: {exampleElapsed}");
         }
 
-        private unsafe void BoolTests(GameDate gd)
+        private unsafe void BoolTests()
         {
-            gd.GetUGlobalWork.Invoke();
-            gd.UpdateDayCount();
+            var gd = _gameDate;
             var exampleDate = new P3Date(2009, 10, 01);
             var exampleElapsed = exampleDate.DaysElapsed;
             var boolCheck = gd.IsDateAtLeast(exampleDate);
@@ -125,6 +124,7 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded
         {
             Log.LogLevel = this._configuration.LogLevel;
             DateTests();
+            if (_gameDate != null && P3IsRunning) { BoolTests(); }
         }
 
         #region Standard Overrides

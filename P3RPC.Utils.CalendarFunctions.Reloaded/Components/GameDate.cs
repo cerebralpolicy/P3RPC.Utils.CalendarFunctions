@@ -12,42 +12,11 @@ using System.Runtime.CompilerServices;
 
 namespace P3RPC.Utils.CalendarFunctions.Reloaded.Components
 {
-    internal unsafe class GameDate: INotifyPropertyChanged
+    internal unsafe class GameDate: IGameDate
     {
         private string GetUGlobalWork_SIG = "48 89 5C 24 ?? 57 48 83 EC 20 48 8B 0D ?? ?? ?? ?? 33 DB";
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        private void DayCountChanged([CallerMemberName] string propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                Log.Debug($"Internal day count: {DayCount}");
-            }
-        }
-
-
-        /// <summary>
-        /// The Wrapper Container
-        /// </summary>
-        public WrapperContainer<IGameDate.loadUGlobalWork> ContainUGlobalWork { get; set; }
         public IGameDate.loadUGlobalWork GetUGlobalWork { get; set; }
-        private uint CachedDayCount = 0;
-        public uint DayCount {  
-            get
-            {
-                return CachedDayCount;
-            } 
-            set
-            {
-                if (CachedDayCount != value)
-                {
-                    CachedDayCount = value;
-                    DayCountChanged();
-                }
-            }
-        }
 
         public unsafe GameDate(ISharedScans scans, IStartupScanner startup) 
         {
@@ -55,18 +24,9 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded.Components
             scans.AddScan<IGameDate.loadUGlobalWork>(GetUGlobalWork_SIG);
             var wrapperContainer = scans.CreateWrapper<IGameDate.loadUGlobalWork>(Mod.NAME);
             GetUGlobalWork = wrapperContainer.Wrapper;
-            ContainUGlobalWork = wrapperContainer;
             Log.Information("Loaded GameDate");
-            Log.Debug($"Internal day count: {DayCount}");
         }
 
-        public unsafe void UpdateDayCount() {
-            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            if (globalWork != null)
-            {
-                DayCount = globalWork->Calendar.DaysSinceApril1;
-            };
-        }
         public unsafe void PrintDate()
         {
             UGlobalWork* globalWork = GetUGlobalWork.Invoke();
@@ -77,26 +37,219 @@ namespace P3RPC.Utils.CalendarFunctions.Reloaded.Components
             }
         }
 
-        public unsafe bool IsDayAtLeast(uint DaysElapsed)
+        #region Day-Based Bools
+
+        public unsafe bool IsDayAtLeast(uint daysElapsed)
         {
             UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            var GlobalElapsed = globalWork->Calendar.DaysSinceApril1;
-            return DaysElapsed >= GlobalElapsed;
+            var globalElapsed = globalWork->Calendar.DaysSinceApril1;
+            P3DateOperationInfo(DateOperation.AtLeast, daysElapsed, globalElapsed);
+            return daysElapsed >= globalElapsed;
         }
+
+        public unsafe bool IsDayExactly(uint daysElapsed)
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            var globalElapsed = globalWork->Calendar.DaysSinceApril1;
+            P3DateOperationInfo(DateOperation.Exactly, daysElapsed, globalElapsed);
+            return daysElapsed == globalElapsed;
+        }
+
+        public unsafe bool IsDayAtMost(uint daysElapsed)
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            var globalElapsed = globalWork->Calendar.DaysSinceApril1;
+            P3DateOperationInfo(DateOperation.AtMost, daysElapsed, globalElapsed);
+            return daysElapsed <= globalElapsed;
+        }
+
+        public unsafe bool IsDayInRange(uint daysStart, uint daysEnd)
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            var globalElapsed = globalWork->Calendar.DaysSinceApril1;
+            P3DateOperationInfo(DateOperation.InRange, daysStart, globalElapsed, daysEnd);
+            return (daysEnd <= globalElapsed) && (daysStart >= globalElapsed);
+        }
+
+        #endregion
+        #region P3DateBasedBools
 
         public unsafe bool IsDateAtLeast(P3Date date)
         {
             UGlobalWork* globalWork = GetUGlobalWork.Invoke();
-            var GlobalElapsed = globalWork->Calendar.DaysSinceApril1;
-            var DaysElapsed = date.DaysElapsed;
-            return DaysElapsed >= GlobalElapsed;
+            var globalElapsed = globalWork->Calendar.DaysSinceApril1;
+            var daysElapsed = date.DaysElapsed;
+            P3DateOperationInfo(DateOperation.AtLeast, daysElapsed, globalElapsed);
+            return daysElapsed >= globalElapsed;
         }
+
+        public unsafe bool IsDateExactly(P3Date date)
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            var globalElapsed = globalWork->Calendar.DaysSinceApril1;
+            var daysElapsed = date.DaysElapsed;
+            P3DateOperationInfo(DateOperation.Exactly, daysElapsed, globalElapsed);
+            return daysElapsed == globalElapsed;
+        }
+
+        public unsafe bool IsDateAtMost(P3Date date)
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            var globalElapsed = globalWork->Calendar.DaysSinceApril1;
+            var daysElapsed = date.DaysElapsed;
+            P3DateOperationInfo(DateOperation.AtMost, daysElapsed, globalElapsed);
+            return daysElapsed <= globalElapsed;
+        }
+        public unsafe bool IsDateInRange(P3Date dateStart, P3Date dateEnd)
+        {
+            UGlobalWork* globalWork = GetUGlobalWork.Invoke();
+            var globalElapsed = globalWork->Calendar.DaysSinceApril1;
+            var daysStart = dateStart.DaysElapsed;
+            var daysEnd = dateEnd.DaysElapsed;
+            P3DateOperationInfo(DateOperation.InRange,daysStart, globalElapsed, daysEnd);
+            return (daysEnd <= globalElapsed) && (daysStart >= globalElapsed);
+        }
+
+        #endregion
 
         private void MainModuleScanned(PatternScanResult result)
         {
-            Log.Debug($"[{Mod.NAME}] Module Signature is {result}.");
+            Log.Debug($"Module Signature is {result}.");
         }
 
+        private static void P3DateOperationInfo (DateOperation operation, uint minDays, uint checkDay, uint maxDays = 364)
+        {
+            if (operation == DateOperation.AtLeast)
+            {
+                var rawoffset = checkDay - minDays;
+                var temporal = "after";
+                if (rawoffset < 0)
+                {
+                    temporal = "before";
+                }
+                var dayS = "day";
+                var offset = Math.Abs(rawoffset);
+                if (offset > 1)
+                {
+                    dayS = "days";
+                }
+                var thisBool = (checkDay >= minDays);
+                var MinDate = new P3Date(minDays).Date;
+                var CheckDate = new P3Date(checkDay).Date;
+                if (checkDay != minDays)
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {CheckDate}, {offset} {dayS} {temporal} {MinDate}.");
+                }
+                else if (checkDay == minDays)
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {MinDate}.");
+                }
+            }
+            else if (operation == DateOperation.AtMost)
+            {
+                var rawoffset = checkDay - minDays;
+                var temporal = "after";
+                if (rawoffset < 0)
+                {
+                    temporal = "before";
+                }
+                var dayS = "day";
+                var offset = Math.Abs(rawoffset);
+                if (offset > 1)
+                {
+                    dayS = "days";
+                }
+                var thisBool = (checkDay <= minDays);
+                var MinDate = new P3Date(minDays).Date;
+                var CheckDate = new P3Date(checkDay).Date;
+                if (checkDay != minDays)
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {CheckDate}, {offset} {dayS} {temporal} {MinDate}.");
+                }
+                else if (checkDay == minDays)
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {MinDate}.");
+                }
+            }
+            else if (operation == DateOperation.Exactly)
+            {
+                var rawoffset = checkDay - minDays;
+                var temporal = "after";
+                if (rawoffset < 0)
+                {
+                    temporal = "before";
+                }
+                var dayS = "day";
+                var offset = Math.Abs(rawoffset);
+                if (offset > 1)
+                {
+                    dayS = "days";
+                }
+                var thisBool = (checkDay == minDays);
+                var MinDate = new P3Date(minDays).Date;
+                var CheckDate = new P3Date(checkDay).Date;
+                if (!thisBool)
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {CheckDate}, {offset} {dayS} {temporal} {MinDate}.");
+                }
+                else if (thisBool)
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {MinDate}.");
+                }
+            }
+            else
+            {
+                uint rawoffset = 0;
+                var MinDate = new P3Date(minDays).Date;
+                var CheckDate = new P3Date(checkDay).Date;
+                var MaxDate = new P3Date(maxDays).Date;
+                var RefDate = MinDate;
+                var temporal = "after";
+                if (checkDay < minDays)
+                {
+                    rawoffset = minDays - checkDay;
+                }
+                else if (checkDay >= maxDays)
+                {
+                    rawoffset = checkDay - maxDays;
+                    temporal = "after";
+                    RefDate = MaxDate;
+                }
+                else
+                {
+                    rawoffset = checkDay - minDays;
+                    temporal = "into";
+                }
+                var dayS = "day";
+                var offset = Math.Abs(rawoffset);
+                if (offset > 1)
+                {
+                    dayS = "days";
+                }
+                var thisBool = ((checkDay <= maxDays)&&(checkDay >= minDays));
+                if (thisBool && (offset > 0))
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {CheckDate}, {offset} {dayS} {temporal} the window of {MinDate} to {MaxDate}.");
+                }
+                else if (thisBool && (offset == 0))
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {RefDate}.");
+                }
+                else if (!thisBool)
+                {
+                    Log.Information($"Date operation returned {thisBool}.");
+                    Log.Debug($"Result: {thisBool} - P3R is currently on {CheckDate}, {offset} {dayS} {temporal} {RefDate}.");
+                }
+            }
+        }
 
         private struct P3DateBool
         {

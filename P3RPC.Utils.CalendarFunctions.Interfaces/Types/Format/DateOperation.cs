@@ -7,3 +7,9 @@ public enum DateOperation
     AtMost,
     Exactly,
 }
+
+public enum DateInputType
+{
+    Days,
+    P3Date,
+}

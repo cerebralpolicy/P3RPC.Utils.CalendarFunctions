@@ -21,6 +21,7 @@
   <ItemGroup>
     <Folder Include="CultureInfos\" />
     <Folder Include="Interfaces\" />
+    <Folder Include="Tasks\" />
   </ItemGroup>
 
 </Project>
